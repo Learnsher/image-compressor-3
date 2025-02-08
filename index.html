@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Compressor</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/@mui/material/5.0.0-alpha.37/material-ui.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mui/material@5.15.3/umd/material-ui.production.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
         body {
             font-family: 'Roboto', sans-serif; /* 使用 Roboto 字體 */
@@ -59,32 +59,50 @@
         }
     </style>
 </head>
-<body class="grey lighten-4">
-    <div class="container">
-        <div class="dropzone" id="dropzone">
-            <p>拖放圖片到這裡，或點擊上傳圖片</p>
-            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event);">
+<body class="MuiBox-root" style="background-color: #f5f5f5;">
+    <div class="MuiContainer max-w-custom" style="padding: 30px; background: white; border-radius: 16px; box-shadow: 0 16px 40px rgba(0,0,0,0.12); margin-top: 40px;">
+        <div class="MuiPaper-root MuiCard-root dropzone" id="dropzone" 
+             style="border: 2px dashed #E0E0E0; background-color: #f8f9fa; 
+                    transition: all 0.3s ease; padding: 30px 20px; max-height: 130px;
+                    display: flex; align-items: center; justify-content: center;">
+            <div class="MuiCardContent-root" style="padding: 0;">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event);">
+                <i class="material-icons" style="font-size: 40px; color: #6E6E6E; margin-bottom: 12px;">cloud_upload</i>
+                <p class="MuiTypography-root MuiTypography-body1" style="color: #6E6E6E; font-size: 1.1rem;">拖放圖片或點擊上傳</p>
+            </div>
         </div>
-        <div>
-            <span>Export Format:</span>
-            <p>
-                <label>
-                    <input type="radio" name="format" value="png" checked onchange="updateFormat()"/>
-                    <span>PNG</span>
+        <div class="MuiFormControl-root" style="margin: 30px 0;">
+            <div class="MuiRadioGroup-root" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                <label class="MuiFormControlLabel-root" 
+                       style="margin: 0; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px;
+                              transition: all 0.2s ease;">
+                    <input type="radio" name="format" value="png" checked 
+                           class="MuiRadio-root" onchange="updateFormat()"
+                           style="accent-color: #FF5A5F;">
+                    <span class="MuiTypography-root" style="font-weight: 500; color: #484848;">PNG</span>
                 </label>
-                <label>
-                    <input type="radio" name="format" value="jpg" onchange="updateFormat()"/>
-                    <span>JPG</span>
+                <label class="MuiFormControlLabel-root" 
+                       style="margin: 0; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px;
+                              transition: all 0.2s ease;">
+                    <input type="radio" name="format" value="jpg" 
+                           class="MuiRadio-root" onchange="updateFormat()"
+                           style="accent-color: #FF5A5F;">
+                    <span class="MuiTypography-root" style="font-weight: 500; color: #484848;">JPG</span>
                 </label>
-            </p>
+            </div>
         </div>
-        <div id="qualitySection" class="mb-3 hidden">
-            <label for="quality">Quality:</label>
-            <div>
-                <Tooltip title="Adjust quality" placement="top">
-                    <input type="range" id="quality" min="0" max="100" value="80" class="range" oninput="updateQualityValue(this.value)">
-                </Tooltip>
-                <span id="qualityValue" class="d-block text-center mt-2">80</span>
+        <div id="qualitySection" class="hidden" style="width: 100%; margin: 24px 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span class="MuiTypography-root" style="color: #484848; font-size: 0.875rem;">壓縮品質</span>
+                <span id="qualityValue" class="MuiTypography-root" style="color: #484848; font-weight: 500;">80%</span>
+            </div>
+            <div class="slider-container" style="position: relative; height: 24px;">
+                <input type="range" id="quality" min="0" max="100" value="80" 
+                       style="--track-height: 4px; --thumb-size: 16px;
+                              width: 100%; height: var(--thumb-size);
+                              -webkit-appearance: none;
+                              appearance: none;
+                              background: transparent;">
             </div>
         </div>
         <div id="bitSwitchSection" class="mb-3" style="display: none;">
@@ -94,48 +112,79 @@
             </label>
         </div>
         
-        <!-- 文件大小顯示區域 -->
-        <div class="file-size-section center-align">
-            <div class="row">
-                <div class="col s6">
-                    <i class="material-icons" style="color: #878787; padding-bottom: 15px;">upload_file</i><br>  
-                    <span id="originalSize" class="d-block" style="font-weight: bold;">-</span>
+        <div class="MuiPaper-root file-size-section" 
+             style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px; padding: 24px;">
+            <div class="MuiGrid-root MuiGrid-container" style="gap: 20px;">
+                <div class="MuiGrid-root MuiGrid-item" 
+                     style="flex: 1; text-align: center; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <i class="material-icons" style="color: #666; font-size: 32px;">insert_drive_file</i>
+                    <div style="margin-top: 12px;">
+                        <div style="color: #888; font-size: 0.9rem;">原始大小</div>
+                        <span id="originalSize" style="font-weight: 600; color: #333;">-</span>
+                    </div>
                 </div>
-                <div class="col s6">
-                    <i class="material-icons" style="color: #878787; padding-bottom: 15px;">zip_file</i><br>
-                    <span id="estimatedSize" class="d-block" style="font-weight: bold;">-</span>
-                </div>
-            </div>
-        </div>
-        <br>
-        <button id="compressButton" class="btn waves-effect waves-light blue w-100 mt-3">Compress Image</button>
-        
-        <!-- 更新進度條 -->
-        <div class="progress-container">
-            <div id="progressBar" style="display: none;">
-                <div class="MuiLinearProgress-root MuiLinearProgress-colorPrimary MuiLinearProgress-determinate" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                    <div class="MuiLinearProgress-bar MuiLinearProgress-barColorPrimary" style="width: 0%;"></div>
+                <div class="MuiGrid-root MuiGrid-item" 
+                     style="flex: 1; text-align: center; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <i class="material-icons" style="color: #666; font-size: 32px;">compress</i>
+                    <div style="margin-top: 12px;">
+                        <div style="color: #888; font-size: 0.9rem;">壓縮後大小</div>
+                        <span id="estimatedSize" style="font-weight: 600; color: #333;">-</span>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div id="progressMessage" class="center-align mt-2 text-lg text-gray-700"></div>
+
+        <button id="compressButton" 
+                class="MuiButton-root" 
+                style="width: 100%; max-width: 500px; margin: 24px auto 0; 
+                       background: linear-gradient(135deg, #FF5A5F 0%, #FF385C 100%);
+                       color: white; padding: 16px 24px; border-radius: 8px; font-weight: 600; 
+                       box-shadow: 0 4px 12px rgba(255,88,95,0.3);
+                       display: block; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+            ⚡ 立即開始壓縮
+        </button>
+        <button id="shareButton" class="MuiButton-root" 
+                style="display: none; 
+                       background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%);
+                       color: white; padding: 16px 24px; border-radius: 8px; font-weight: 600;
+                       box-shadow: 0 4px 12px rgba(255,167,38,0.3); margin: 16px auto 0;
+                       width: 100%; max-width: 500px; text-align: center; text-decoration: none !important;
+                       box-sizing: border-box; border: 2px solid transparent;">
+            <i class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">share</i>
+            直接分享
+        </button>
+        <div id="progressContainer" class="hidden" style="width: 100%; margin: 24px 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span class="MuiTypography-root" style="color: #484848; font-size: 0.875rem;">壓縮進度</span>
+                <span id="progressPercentage" class="MuiTypography-root" style="color: #484848; font-weight: 500;">0%</span>
+            </div>
+            <div class="progress-bar-track" style="height: 8px; border-radius: 4px; background: #f0f0f0; overflow: hidden;">
+                <div id="progressFill" style="width: 0%; height: 100%; 
+                      background: linear-gradient(90deg, #FF5A5F 0%, #FF385C 100%);
+                      border-radius: 4px; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
         <canvas id="canvas" class="hidden"></canvas>
-        <a id="downloadLink" class="d-block mt-3 download-button btn waves-effect waves-light green" style="display: none;">
-            <i class="material-icons left">download</i> Download Compressed Image
+        <a id="downloadLink" class="MuiButton-root" 
+           style="display: none; 
+                  background: linear-gradient(135deg, #00A699 0%, #008489 100%);
+                  color: white; padding: 16px 24px; border-radius: 8px; font-weight: 600;
+                  box-shadow: 0 4px 12px rgba(0,166,153,0.3); margin: 16px auto 0;
+                  width: 100%; max-width: 500px; text-align: center; text-decoration: none !important;
+                  box-sizing: border-box;
+                  border: 2px solid transparent;">
+            <i class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">file_download</i>
+            下載
         </a>
+        <div id="fileInfo" class="MuiTypography-root" style="margin: 12px 0; color: #484848; display: none;">
+            <i class="material-icons" style="font-size: 18px; vertical-align: middle;">description</i>
+            <span id="fileName" style="margin-left: 8px;"></span>
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/@mui/material/5.0.0-alpha.37/material-ui.min.js"></script>
     <script src="libs/pako.js"></script>
     <script src="libs/UPNG.js"></script>
     <script src="script.js"></script>
     <script>
-        // 更新質量值顯示
-        function updateQualityValue(value) {
-            document.getElementById('qualityValue').innerText = value;
-        }
-
         // 處理文件上傳
         document.getElementById('dropzone').addEventListener('click', function() {
             document.getElementById('imageInput').click();
@@ -168,30 +217,6 @@
                 // 在這裡處理文件上傳邏輯
                 console.log('Uploaded file:', file);
                 // 更新文件大小顯示等
-                const progressBar = document.getElementById('progressBar');
-                progressBar.style.display = 'block';
-                let width = 0;
-                const interval = setInterval(() => {
-                    if (width >= 100) {
-                        clearInterval(interval);
-                        progressBar.style.display = 'none'; // 隱藏進度條
-                    } else {
-                        width++;
-                        progressBar.querySelector('.MuiLinearProgress-bar').style.width = width + '%';
-                    }
-                }, 50); // 模擬進度更新
-
-                // 這裡可以添加實際的圖片處理邏輯
-                // 例如，使用 pako.js 或 UPNG.js 進行壓縮
-                // 並在處理過程中更新進度條
-
-                // 假設壓縮後的圖片數據
-                const compressedImageData = new Blob([/* 圖片數據 */], { type: 'image/jpeg' }); // 或 'image/png'
-                const downloadLink = document.getElementById('downloadLink');
-                const url = URL.createObjectURL(compressedImageData);
-                downloadLink.href = url;
-                downloadLink.download = 'compressed_image.jpg'; // 設置下載文件名
-                downloadLink.style.display = 'block'; // 顯示下載鏈接
             }
         }
     </script>

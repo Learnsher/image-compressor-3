@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('imageInput');
     const compressButton = document.getElementById('compressButton');
 
+    // 初始隱藏 quality section
+    const format = document.querySelector('input[name="format"]:checked').value;
+    const qualitySection = document.getElementById('qualitySection');
+    if (format === 'png') {
+        qualitySection.classList.add('hidden');
+    }
+
     if (qualityInput) {
         qualityInput.addEventListener('input', function() {
             document.getElementById('qualityValue').textContent = this.value;
@@ -24,12 +31,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (imageInput) {
         imageInput.addEventListener('change', function() {
-            document.getElementById('downloadLink').style.display = 'none';
-            document.getElementById('downloadLink').href = '';
-            document.getElementById('downloadLink').textContent = '';
-            document.getElementById('progressBar').style.display = 'none';
-            document.getElementById('progressBar').value = 0;
-            document.getElementById('progressMessage').textContent = '';
+            const downloadLink = document.getElementById('downloadLink');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            if(downloadLink) {
+                downloadLink.style.display = 'none';
+                downloadLink.href = '';
+                downloadLink.textContent = '';
+            }
+            
+            if(progressContainer) {
+                progressContainer.classList.remove('show');
+                progressContainer.classList.add('hidden');
+            }
 
             // 重置大小顯示
             document.getElementById('originalSize').textContent = `${formatFileSize(imageInput.files[0].size)}`;
@@ -49,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const format = document.querySelector('input[name="format"]:checked').value;
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
-            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
             const progressMessage = document.getElementById('progressMessage');
 
             if (fileInput.files.length === 0) {
@@ -67,19 +81,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
 
-                    progressBar.style.display = 'block';
-                    progressMessage.textContent = '0%';
-
-                    // 隱藏下載鏈接
-                    document.getElementById('downloadLink').style.display = 'none';
-
-                    // Simulate compression progress
+                    // 初始化進度控制
                     let progress = 0;
+                    
+                    // 顯示進度條
+                    if(progressContainer) {
+                        progressContainer.classList.remove('hidden');
+                        progressContainer.classList.add('show');
+                    }
+                    updateProgress(0);
+
                     const interval = setInterval(() => {
                         progress += 1;
-                        progressBar.value = progress;
-                        progressMessage.textContent = `${progress}%`;
-
+                        updateProgress(progress);
+                        
                         if (progress >= 100) {
                             clearInterval(interval);
 
@@ -100,15 +115,36 @@ document.addEventListener('DOMContentLoaded', function() {
                             const downloadLink = document.getElementById('downloadLink');
                             downloadLink.href = dataUrl;
                             downloadLink.download = `compressed_image.${format}`;
-
                             downloadLink.style.display = 'block';
-                            downloadLink.textContent = 'Download Compressed Image';
+                            downloadLink.textContent = '下載';
 
-                            progressBar.style.display = 'none';
-                            progressBar.value = 0;
-                            progressMessage.textContent = 'All done! Your image is ready to download!';
+                            // 隱藏進度條
+                            progressContainer.classList.remove('show');
+                            progressContainer.classList.add('hidden');
+
+                            // 新增分享按鈕處理
+                            const shareButton = document.getElementById('shareButton');
+                            shareButton.style.display = 'block';
+                            shareButton.onclick = async () => {
+                                try {
+                                    const blob = await fetch(dataUrl).then(r => r.blob());
+                                    const file = new File([blob], `compressed_image.${format}`, { type: blob.type });
+                                    
+                                    if (navigator.share) {
+                                        await navigator.share({
+                                            files: [file],
+                                            title: '壓縮圖片',
+                                            text: '使用圖片壓縮工具生成的圖片'
+                                        });
+                                    } else {
+                                        alert('您的瀏覽器不支援分享功能');
+                                    }
+                                } catch (error) {
+                                    console.log('分享取消:', error);
+                                }
+                            };
                         }
-                    }, 30); // Adjust the interval time for a smoother experience
+                    }, 30);
                 };
                 img.src = event.target.result;
             };
@@ -128,14 +164,15 @@ function updateFormat() {
     const bitSwitch = document.getElementById('bitSwitch');
 
     if (format === 'jpg') {
-        qualitySection.classList.remove('hidden'); // 顯示質量選項
-        bitSwitchSection.classList.add('hidden'); // 隱藏位開關選項
-    } else if (format === 'png') {
-        qualitySection.classList.add('hidden'); // 隱藏質量選項
+        qualitySection.classList.remove('hidden');
+    } else {
+        qualitySection.classList.add('hidden');
+    }
+
+    if (format === 'png') {
         bitSwitch.checked = true; // 自動選中位開關
         bitSwitchSection.classList.remove('hidden'); // 顯示位開關選項
     } else {
-        qualitySection.classList.add('hidden'); // 隱藏質量選項
         bitSwitchSection.classList.remove('hidden'); // 顯示位開關選項
     }
 
@@ -219,4 +256,24 @@ function formatFileSize(size) {
     } else { // 小於或等於 1 MB
         return `${(size / 1024).toFixed(2)} KB`;
     }
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        document.getElementById('fileInfo').style.display = 'flex';
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('originalSize').textContent = `${formatFileSize(file.size)}`;
+        document.getElementById('estimatedSize').textContent = '計算中...';
+        updateEstimatedSize();
+    }
+}
+
+// 修改進度更新邏輯
+function updateProgress(percentage) {
+    const progressFill = document.getElementById('progressFill');
+    const progressPercentage = document.getElementById('progressPercentage');
+    
+    progressFill.style.width = `${percentage}%`;
+    progressPercentage.textContent = `${Math.min(100, Math.floor(percentage))}%`;
 }

@@ -1,11 +1,12 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    padding: 40px 20px;
 }
 
 .container {
@@ -133,4 +134,197 @@ button:hover {
 .drop-zone.dragging {
     border-color: #007bff;
     background-color: #e0f7ff;
+}
+
+/* 新增 MUI 相關調整 */
+.max-w-custom {
+    max-width: 600px;
+    width: 95%;
+}
+
+.dropzone {
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding: 30px 20px !important;
+}
+
+.MuiFormControlLabel-root {
+    margin-right: 0 !important;
+}
+
+.MuiButton-root {
+    text-transform: none !important;
+    padding: 8px 16px !important;
+}
+
+/* 新增 Airbnb 風格調整 */
+.dropzone:hover {
+    border-color: #8D7BFF;
+    background-color: rgba(141,123,255,0.05);
+    transform: translateY(-2px);
+}
+
+.MuiFormControlLabel-root.Mui-selected {
+    border-color: #8D7BFF !important;
+    background: rgba(141,123,255,0.05) !important;
+}
+
+#compressButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(108,92,231,0.25);
+}
+
+progress {
+    height: 8px;
+    border-radius: 4px;
+    background: #eee;
+}
+
+progress::-webkit-progress-bar {
+    background: #eee;
+    border-radius: 4px;
+}
+
+progress::-webkit-progress-value {
+    background: linear-gradient(135deg, #6C5CE7 0%, #8D7BFF 100%);
+    border-radius: 4px;
+}
+
+#downloadLink {
+    display: none;
+    background: linear-gradient(135deg, #00C853 0%, #4CAF50 100%);
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-weight: 600;
+    text-transform: none;
+    box-shadow: 0 4px 6px rgba(76,175,80,0.2);
+}
+
+/* 新增滑塊樣式 */
+#quality {
+    width: 100%;
+}
+
+#quality::-webkit-slider-runnable-track {
+    height: var(--track-height);
+    background: linear-gradient(90deg, #FF385C 0%, #FF5A5F 100%);
+    border-radius: 2px;
+}
+
+#quality::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    background: #ffffff;
+    border: 2px solid #FF385C;
+    border-radius: 50%;
+    margin-top: calc((var(--thumb-size) - var(--track-height)) / -2);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+#quality:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+
+/* 檔案名稱顯示動畫 */
+#fileInfo {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+#fileName {
+    font-size: 0.9rem;
+    color: #484848;
+    font-weight: 500;
+}
+
+/* 修正滑塊在 Firefox 的樣式 */
+#quality::-moz-range-track {
+    height: var(--track-height);
+    background: linear-gradient(90deg, #FF385C 0%, #FF5A5F 100%);
+    border-radius: 2px;
+}
+
+#quality::-moz-range-thumb {
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    background: #ffffff;
+    border: 2px solid #FF385C;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 調整進度條樣式 */
+#progressBar {
+    width: 100% !important;
+    background: #f0f0f0;
+}
+
+#progressBar::-webkit-progress-value {
+    background: linear-gradient(90deg, #FF5A5F 0%, #FF385C 100%);
+    border-radius: 4px;
+}
+
+/* 隱藏 qualitySection 初始狀態 */
+#qualitySection.hidden {
+    display: none;
+}
+
+/* 加強單選按鈕互動效果 */
+.MuiFormControlLabel-root:hover {
+    border-color: #FF5A5F !important;
+    background: rgba(255,90,95,0.05) !important;
+}
+
+.MuiFormControlLabel-root.Mui-selected {
+    border-color: #FF5A5F !important;
+    background: rgba(255,90,95,0.1) !important;
+}
+
+/* 移除下載按鈕底線 */
+#downloadLink:hover {
+    text-decoration: none !important;
+}
+
+/* 強制按鈕統一模型 */
+#compressButton, #downloadLink {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    margin: 16px auto !important;
+}
+
+/* 新增分享按鈕樣式 */
+#shareButton {
+    display: none;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#shareButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255,167,38,0.4);
+}
+
+/* 新增進度動畫 */
+#progressFill {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left;
+}
+
+/* 進度容器動畫 */
+#progressContainer {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+#progressContainer.show {
+    opacity: 1;
+    transform: translateY(0);
 }
