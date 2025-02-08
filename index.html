@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/@mui/material/5.0.0-alpha.37/material-ui.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif; /* 使用 Roboto 字體 */
+        }
+        .max-w-custom {
+            max-width: 800px; /* 設置最大寬度為 800 像素 */
+            width: 90%; /* 設置寬度為 90% */
+        }
+        .loading {
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .file-size-section {
+            border: 1px solid #dee2e6; /* 邊框 */
+            border-radius: 0.25rem; /* 圓角 */
+            padding: 1rem; /* 內邊距 */
+            margin-top: 1rem; /* 上邊距 */
+            background-color: #f8f9fa; /* 背景顏色 */
+        }
+        .upload-field {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px; /* 調整間距 */
+        }
+        .upload-field input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+            width: 100%;
+        }
+        .download-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dropzone {
+            border: 2px dashed #2196F3; /* 藍色虛線邊框 */
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px; /* 調整間距 */
+        }
+        .dropzone:hover {
+            background-color: #f0f0f0; /* 懸停時的背景顏色 */
+        }
+    </style>
+</head>
+<body class="grey lighten-4">
+    <div class="container">
+        <div class="dropzone" id="dropzone">
+            <p>拖放圖片到這裡，或點擊上傳圖片</p>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event);">
+        </div>
+        <div>
+            <span>Export Format:</span>
+            <p>
+                <label>
+                    <input type="radio" name="format" value="png" checked onchange="updateFormat()"/>
+                    <span>PNG</span>
+                </label>
+                <label>
+                    <input type="radio" name="format" value="jpg" onchange="updateFormat()"/>
+                    <span>JPG</span>
+                </label>
+            </p>
+        </div>
+        <div id="qualitySection" class="mb-3 hidden">
+            <label for="quality">Quality:</label>
+            <div>
+                <Tooltip title="Adjust quality" placement="top">
+                    <input type="range" id="quality" min="0" max="100" value="80" class="range" oninput="updateQualityValue(this.value)">
+                </Tooltip>
+                <span id="qualityValue" class="d-block text-center mt-2">80</span>
+            </div>
+        </div>
+        <div id="bitSwitchSection" class="mb-3" style="display: none;">
+            <label>
+                <input type="checkbox" id="bitSwitch" checked>
+                <span>Convert to 8-bit PNG</span>
+            </label>
+        </div>
+        
+        <!-- 文件大小顯示區域 -->
+        <div class="file-size-section center-align">
+            <div class="row">
+                <div class="col s6">
+                    <i class="material-icons" style="color: #878787; padding-bottom: 15px;">upload_file</i><br>  
+                    <span id="originalSize" class="d-block" style="font-weight: bold;">-</span>
+                </div>
+                <div class="col s6">
+                    <i class="material-icons" style="color: #878787; padding-bottom: 15px;">zip_file</i><br>
+                    <span id="estimatedSize" class="d-block" style="font-weight: bold;">-</span>
+                </div>
+            </div>
+        </div>
+        <br>
+        <button id="compressButton" class="btn waves-effect waves-light blue w-100 mt-3">Compress Image</button>
+        
+        <!-- 分享按鈕 -->
+        <button id="shareButton" class="btn waves-effect waves-light green w-100 mt-3" style="display: none;">
+            Share Image
+        </button>
+        
+        <!-- 更新進度條 -->
+        <div class="progress-container">
+            <div id="progressBar" style="display: none;">
+                <div class="MuiLinearProgress-root MuiLinearProgress-colorPrimary MuiLinearProgress-determinate" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="MuiLinearProgress-bar MuiLinearProgress-barColorPrimary" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="progressMessage" class="center-align mt-2 text-lg text-gray-700"></div>
+        <canvas id="canvas" class="hidden"></canvas>
+        <a id="downloadLink" class="d-block mt-3 download-button btn waves-effect waves-light green" style="display: none;">
+            <i class="material-icons left">download</i> Download Compressed Image
+        </a>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/@mui/material/5.0.0-alpha.37/material-ui.min.js"></script>
+    <script src="libs/pako.js"></script>
+    <script src="libs/UPNG.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // 更新質量值顯示
+        function updateQualityValue(value) {
+            document.getElementById('qualityValue').innerText = value;
+        }
+
+        // 處理文件上傳
+        document.getElementById('dropzone').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+        });
+
+        document.getElementById('dropzone').addEventListener('dragover', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.style.backgroundColor = '#e0e0e0'; // 拖放時的背景顏色
+        });
+
+        document.getElementById('dropzone').addEventListener('dragleave', function(event) {
+            this.style.backgroundColor = ''; // 恢復背景顏色
+        });
+
+        document.getElementById('dropzone').addEventListener('drop', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.style.backgroundColor = ''; // 恢復背景顏色
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('imageInput').files = files; // 設置文件
+                handleFileUpload({ target: { files: files } }); // 處理文件上傳
+            }
+        });
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // 在這裡處理文件上傳邏輯
+                console.log('Uploaded file:', file);
+                // 更新文件大小顯示等
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.display = 'block';
+                let width = 0;
+                const interval = setInterval(() => {
+                    if (width >= 100) {
+                        clearInterval(interval);
+                        progressBar.style.display = 'none'; // 隱藏進度條
+                        document.getElementById('shareButton').style.display = 'block'; // 顯示分享按鈕
+                    } else {
+                        width++;
+                        progressBar.querySelector('.MuiLinearProgress-bar').style.width = width + '%';
+                    }
+                }, 50); // 模擬進度更新
+
+                // 這裡可以添加實際的圖片處理邏輯
+                // 例如，使用 pako.js 或 UPNG.js 進行壓縮
+                // 並在處理過程中更新進度條
+            }
+        }
+
+        // 分享圖片功能
+        document.getElementById('shareButton').addEventListener('click', function() {
+            const canvas = document.getElementById('canvas');
+            canvas.toBlob(function(blob) {
+                const imageData = URL.createObjectURL(blob); // 獲取 Blob URL
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Share Compressed Image',
+                        text: 'Check out this compressed image!',
+                        url: imageData // 使用 Blob URL 作為分享的 URL
+                    }).then(() => {
+                        console.log('Share successful');
+                    }).catch((error) => {
+                        console.error('Error sharing:', error);
+                    });
+                } else {
+                    alert('Sharing not supported on this browser.');
+                }
+            }, 'image/png'); // 將 canvas 轉換為 Blob
+        });
+    </script>
+</body>
+</html>
